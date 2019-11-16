@@ -10,13 +10,13 @@ import android.view.ViewGroup
 import dev.touyou.checkitoutandroid.R
 import kotlinx.android.synthetic.main.main_fragment.*
 
-class MainFragment : Fragment() {
+class PadFragment : Fragment() {
 
     companion object {
-        fun newInstance() = MainFragment()
+        fun newInstance() = PadFragment()
     }
 
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: PadViewModel
     private val pads by lazy {
         listOf(pad1, pad2, pad3, pad4,
             pad5, pad6, pad7, pad8,
@@ -33,7 +33,7 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(PadViewModel::class.java)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

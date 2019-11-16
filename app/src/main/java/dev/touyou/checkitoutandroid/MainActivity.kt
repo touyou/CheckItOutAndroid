@@ -2,7 +2,7 @@ package dev.touyou.checkitoutandroid
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import dev.touyou.checkitoutandroid.ui.main.MainFragment
+import dev.touyou.checkitoutandroid.ui.main.PadFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.padContainer, MainFragment.newInstance())
+                .replace(R.id.padContainer, PadFragment.newInstance())
                 .commitNow()
         }
     }
