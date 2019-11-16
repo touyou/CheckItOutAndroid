@@ -5,4 +5,462 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.MainFragment"/>
+    tools:context=".ui.main.MainFragment">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/red_pad" />
+
+                <TextView
+                    android:id="@+id/pad1Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD1"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/red_pad" />
+
+                <TextView
+                    android:id="@+id/pad2Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD2"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/red_pad" />
+
+                <TextView
+                    android:id="@+id/pad3Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD3"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad4"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/red_pad" />
+
+                <TextView
+                    android:id="@+id/pad4Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD4"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad5"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/yellow_pad" />
+
+                <TextView
+                    android:id="@+id/pad5Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD5"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad6"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/yellow_pad" />
+
+                <TextView
+                    android:id="@+id/pad6Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD6"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad7"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:paddingBottom="4dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/yellow_pad" />
+
+                <TextView
+                    android:id="@+id/pad7Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD7"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad8"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/yellow_pad" />
+
+                <TextView
+                    android:id="@+id/pad8Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD8"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad9"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:paddingBottom="4dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/green_pad" />
+
+                <TextView
+                    android:id="@+id/pad9Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD9"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad10"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/green_pad" />
+
+                <TextView
+                    android:id="@+id/pad10Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD10"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad11"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/green_pad" />
+
+                <TextView
+                    android:id="@+id/pad11Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD11"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad12"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/green_pad" />
+
+                <TextView
+                    android:id="@+id/pad12Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD12"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad13"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/blue_pad" />
+
+                <TextView
+                    android:id="@+id/pad13Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD13"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad14"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/blue_pad" />
+
+                <TextView
+                    android:id="@+id/pad14Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD14"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad15"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/blue_pad" />
+
+                <TextView
+                    android:id="@+id/pad15Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD15"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/pad16"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:contentDescription="Pad"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/blue_pad" />
+
+                <TextView
+                    android:id="@+id/pad16Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/logotypejp_mp_b_1"
+                    android:paddingBottom="4dp"
+                    android:text="PAD16"
+                    android:textColor="@color/textGray"
+                    android:textSize="8sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
