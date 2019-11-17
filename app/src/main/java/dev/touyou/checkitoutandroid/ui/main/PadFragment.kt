@@ -1,5 +1,6 @@
 package dev.touyou.checkitoutandroid.ui.main
 
+import android.media.MediaPlayer
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import dev.touyou.checkitoutandroid.R
 import kotlinx.android.synthetic.main.main_fragment.*
 
@@ -23,6 +25,12 @@ class PadFragment : Fragment() {
             pad9, pad10, pad11, pad12,
             pad13, pad14, pad15, pad16)
     }
+    private var mediaPlayers: MutableList<MediaPlayer?> = mutableListOf(
+        null, null, null, null,
+        null, null, null, null,
+        null, null, null, null,
+        null, null, null, null
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +42,11 @@ class PadFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(PadViewModel::class.java)
+
+        setSounds(viewModel.sounds.toList())
+        viewModel.assignedSound.observe(this, Observer {
+            setSounds(it)
+        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -42,7 +55,14 @@ class PadFragment : Fragment() {
         for ((index, pad) in pads.withIndex()) {
             pad.setOnTouchListener { _, motionEvent ->
                 when(motionEvent.action) {
-                    MotionEvent.ACTION_DOWN -> pad.setImageResource(selectedPadImage(index))
+                    MotionEvent.ACTION_DOWN -> {
+                        pad.setImageResource(selectedPadImage(index))
+                        if (mediaPlayers[index]?.isPlaying ?: false) {
+                            mediaPlayers[index]?.stop()
+                            mediaPlayers[index]?.prepare()
+                        }
+                        mediaPlayers[index]?.start()
+                    }
                     MotionEvent.ACTION_UP -> pad.setImageResource(padImage(index))
                     else -> {}
                 }
@@ -51,6 +71,15 @@ class PadFragment : Fragment() {
         }
     }
 
+    private fun setSounds(list: List<Int?>) {
+        for ((index, resId) in list.withIndex()) {
+            if (resId != null) {
+                mediaPlayers[index] = MediaPlayer.create(activity, resId)
+            } else {
+                mediaPlayers[index] = null
+            }
+        }
+    }
 
     private fun selectedPadImage(index: Int): Int {
         return when(index) {
