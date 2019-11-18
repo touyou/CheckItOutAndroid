@@ -9,8 +9,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import dev.touyou.checkitoutandroid.PlayMode
 import dev.touyou.checkitoutandroid.R
 import kotlinx.android.synthetic.main.main_fragment.*
+import java.lang.Exception
 
 class PadFragment : Fragment() {
 
@@ -41,33 +43,24 @@ class PadFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(PadViewModel::class.java)
+        viewModel = activity?.let { ViewModelProviders.of(it).get(PadViewModel::class.java) } ?: throw Exception("Invalid Activity")
 
         setSounds(viewModel.sounds.toList())
-        viewModel.assignedSound.observe(this, Observer {
+        viewModel.assignedSound.observe(viewLifecycleOwner, Observer {
             setSounds(it)
+        })
+        changePadTouchListener()
+        viewModel.currentMode.observe(viewLifecycleOwner, Observer {
+            println("change")
+            changePadTouchListener()
         })
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onDestroy() {
+        super.onDestroy()
 
-        for ((index, pad) in pads.withIndex()) {
-            pad.setOnTouchListener { _, motionEvent ->
-                when(motionEvent.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        pad.setImageResource(selectedPadImage(index))
-                        if (mediaPlayers[index]?.isPlaying ?: false) {
-                            mediaPlayers[index]?.stop()
-                            mediaPlayers[index]?.prepare()
-                        }
-                        mediaPlayers[index]?.start()
-                    }
-                    MotionEvent.ACTION_UP -> pad.setImageResource(padImage(index))
-                    else -> {}
-                }
-                true
-            }
+        for (mediaPlayer in mediaPlayers) {
+            mediaPlayer?.release()
         }
     }
 
@@ -77,6 +70,35 @@ class PadFragment : Fragment() {
                 mediaPlayers[index] = MediaPlayer.create(activity, resId)
             } else {
                 mediaPlayers[index] = null
+            }
+        }
+    }
+
+    private fun changePadTouchListener() {
+        println(viewModel.currentMode.value)
+        for ((index, pad) in pads.withIndex()) {
+            pad.setOnTouchListener(null)
+            pad.setOnTouchListener { _, motionEvent ->
+                when(motionEvent.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        pad.setImageResource(selectedPadImage(index))
+                        if (viewModel.currentMode.value == PlayMode.PLAY) {
+                            if (mediaPlayers[index]?.isPlaying ?: false) {
+                                mediaPlayers[index]?.stop()
+                                mediaPlayers[index]?.prepare()
+                            }
+                            mediaPlayers[index]?.start()
+                        } else if (viewModel.currentMode.value == PlayMode.EDIT) {
+                            viewModel.selectedPad = index
+                            pads.mapIndexed { idx, imageView ->
+                                if (idx != index) imageView.setImageResource(padImage(idx))
+                            }
+                        }
+                    }
+                    MotionEvent.ACTION_UP -> if (viewModel.currentMode.value != PlayMode.EDIT) pad.setImageResource(padImage(index))
+                    else -> {}
+                }
+                true
             }
         }
     }
