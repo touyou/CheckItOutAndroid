@@ -49,10 +49,10 @@ class PadFragment : Fragment() {
         viewModel.assignedSound.observe(viewLifecycleOwner, Observer {
             setSounds(it)
         })
-        changePadTouchListener()
+        changePadTouchListener(PlayMode.PLAY)
         viewModel.currentMode.observe(viewLifecycleOwner, Observer {
-            println("change")
-            changePadTouchListener()
+            pads.mapIndexed { index, pad -> pad.setImageResource(padImage(index)) }
+            changePadTouchListener(it)
         })
     }
 
@@ -74,7 +74,7 @@ class PadFragment : Fragment() {
         }
     }
 
-    private fun changePadTouchListener() {
+    private fun changePadTouchListener(mode: PlayMode) {
         println(viewModel.currentMode.value)
         for ((index, pad) in pads.withIndex()) {
             pad.setOnTouchListener(null)
@@ -82,20 +82,20 @@ class PadFragment : Fragment() {
                 when(motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
                         pad.setImageResource(selectedPadImage(index))
-                        if (viewModel.currentMode.value == PlayMode.PLAY) {
+                        if (mode == PlayMode.PLAY) {
                             if (mediaPlayers[index]?.isPlaying ?: false) {
                                 mediaPlayers[index]?.stop()
                                 mediaPlayers[index]?.prepare()
                             }
                             mediaPlayers[index]?.start()
-                        } else if (viewModel.currentMode.value == PlayMode.EDIT) {
+                        } else if (mode == PlayMode.EDIT) {
                             viewModel.selectedPad = index
                             pads.mapIndexed { idx, imageView ->
                                 if (idx != index) imageView.setImageResource(padImage(idx))
                             }
                         }
                     }
-                    MotionEvent.ACTION_UP -> if (viewModel.currentMode.value != PlayMode.EDIT) pad.setImageResource(padImage(index))
+                    MotionEvent.ACTION_UP -> if (mode != PlayMode.EDIT) pad.setImageResource(padImage(index))
                     else -> {}
                 }
                 true
