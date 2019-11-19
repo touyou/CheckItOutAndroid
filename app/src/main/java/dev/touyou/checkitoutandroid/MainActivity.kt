@@ -1,7 +1,7 @@
 package dev.touyou.checkitoutandroid
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.ui.main.ControlFragment
