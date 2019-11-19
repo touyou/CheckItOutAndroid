@@ -9,7 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import dev.touyou.checkitoutandroid.PlayMode
+import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.R
 import kotlinx.android.synthetic.main.main_fragment.*
 import java.lang.Exception

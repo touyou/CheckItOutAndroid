@@ -2,12 +2,13 @@ package dev.touyou.checkitoutandroid
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.ui.main.ControlFragment
 import dev.touyou.checkitoutandroid.ui.main.PadFragment
 import dev.touyou.checkitoutandroid.ui.main.PadViewModel
+import io.realm.Realm
+import io.realm.RealmConfiguration
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
@@ -17,6 +18,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
+
+        initRealm()
+
         viewModel = ViewModelProviders.of(this).get(PadViewModel::class.java)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -27,6 +31,20 @@ class MainActivity : AppCompatActivity() {
                 .commitNow()
         }
 
+        initButton()
+    }
+
+    // IMO: move to application extended class ?
+    private fun initRealm() {
+        Realm.init(this)
+        val config = RealmConfiguration.Builder()
+            .name("sounddb.realm")
+            .schemaVersion(1)
+            .build()
+        Realm.setDefaultConfiguration(config)
+    }
+
+    private fun initButton() {
         playButton.alpha = 0.3f
         playButton.setOnClickListener {
             viewModel.changeMode(PlayMode.PLAY)
@@ -47,6 +65,4 @@ class MainActivity : AppCompatActivity() {
             editButton.alpha = 0.3f
         }
     }
-
-
 }

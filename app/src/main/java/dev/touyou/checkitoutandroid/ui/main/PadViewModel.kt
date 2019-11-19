@@ -2,10 +2,15 @@ package dev.touyou.checkitoutandroid.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import dev.touyou.checkitoutandroid.PlayMode
+import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.R
+import io.realm.Realm
 
 class PadViewModel : ViewModel() {
+    val realm: Realm by lazy {
+        Realm.getDefaultInstance()
+    }
+
     val assignedSound by lazy {
         MutableLiveData<List<Int?>>(sounds.toList())
     }
@@ -18,6 +23,11 @@ class PadViewModel : ViewModel() {
         R.raw.touyou, R.raw.chekera_cut, R.raw.minnade_cut, null,
         R.raw.touyou, R.raw.chekera_cut, R.raw.minnade_cut, null
     )
+
+    override fun onCleared() {
+        realm.close()
+        super.onCleared()
+    }
 
     fun changeSound(index: Int, resId: Int) {
         sounds[index] = resId
