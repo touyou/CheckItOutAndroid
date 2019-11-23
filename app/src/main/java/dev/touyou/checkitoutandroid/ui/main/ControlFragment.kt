@@ -1,13 +1,16 @@
 package dev.touyou.checkitoutandroid.ui.main
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import dev.touyou.checkitoutandroid.R
+import dev.touyou.checkitoutandroid.entity.SoundData
+import kotlinx.android.synthetic.main.control_fragment.*
 
 class ControlFragment : Fragment() {
 
@@ -15,7 +18,7 @@ class ControlFragment : Fragment() {
         fun newInstance() = ControlFragment()
     }
 
-    private lateinit var viewModel: ControlViewModel
+    private lateinit var viewModel: PadViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,8 +29,16 @@ class ControlFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(ControlViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel = activity?.let { ViewModelProviders.of(it).get(PadViewModel::class.java) }
+            ?: throw Exception("Invalid Activity")
+
+        var soundList = mutableListOf<SoundData>()
+        viewModel.getSoundData().observe(viewLifecycleOwner, Observer {
+            soundList = it.toMutableList()
+        })
+
+        soundRecyclerView.adapter = SoundViewAdapter(soundList)
+        soundRecyclerView.layoutManager = LinearLayoutManager(context)
     }
 
 }

@@ -70,10 +70,10 @@
 
         <FrameLayout
             android:id="@+id/controlContainer"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2">
-        </FrameLayout>
+            android:layout_weight="2"
+            android:padding="4dp"></FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
