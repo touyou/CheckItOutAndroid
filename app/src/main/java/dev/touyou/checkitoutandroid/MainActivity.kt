@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
             realm.soundDao().addToSound("バスドラ", 0, rawId = R.raw.touyou)
             realm.soundDao().addToSound("みんなで", 1, rawId = R.raw.minnade_cut)
             realm.soundDao().addToSound("チェケラ", 2, rawId = R.raw.chekera_cut)
-
+            
             prefs.edit {
                 this.putBoolean(prefName, true)
                 this.commit()

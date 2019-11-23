@@ -10,7 +10,7 @@ class SoundDao(val realm: Realm) {
     fun addToSound(displayName: String, padNum: Int, urlStr: String? = null, rawId: Int? = null) {
         realm.executeTransactionAsync {
             val sounds = it.where(SoundData::class.java).findAll().sort("id")
-            val lastId = sounds.last()?.id ?: -1
+            val lastId = if (sounds.isEmpty()) -1 else sounds.last()!!.id
             val sound = SoundData()
             sound.id = lastId + 1
             sound.displayName = displayName

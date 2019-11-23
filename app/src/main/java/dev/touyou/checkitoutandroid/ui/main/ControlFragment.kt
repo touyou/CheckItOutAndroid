@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.touyou.checkitoutandroid.R
 import dev.touyou.checkitoutandroid.entity.SoundData
+import io.realm.Realm
 import kotlinx.android.synthetic.main.control_fragment.*
 
 class ControlFragment : Fragment() {
@@ -32,7 +33,8 @@ class ControlFragment : Fragment() {
         viewModel = activity?.let { ViewModelProviders.of(it).get(PadViewModel::class.java) }
             ?: throw Exception("Invalid Activity")
 
-        var soundList = mutableListOf<SoundData>()
+        val realm = Realm.getDefaultInstance()
+        var soundList = realm.where(SoundData::class.java).findAll().toMutableList()
         viewModel.getSoundData().observe(viewLifecycleOwner, Observer {
             soundList = it.toMutableList()
         })
