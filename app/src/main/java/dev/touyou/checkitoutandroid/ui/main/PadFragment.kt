@@ -2,6 +2,7 @@ package dev.touyou.checkitoutandroid.ui.main
 
 import android.annotation.SuppressLint
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -11,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import dev.touyou.checkitoutandroid.R
+import dev.touyou.checkitoutandroid.entity.AssignedSound
 import dev.touyou.checkitoutandroid.entity.PlayMode
 import kotlinx.android.synthetic.main.main_fragment.*
 
@@ -52,6 +54,7 @@ class PadFragment : Fragment() {
         viewModel.assignedSound.observe(viewLifecycleOwner, Observer {
             setSounds(it)
         })
+
         changePadTouchListener(PlayMode.PLAY)
         viewModel.currentMode.observe(viewLifecycleOwner, Observer {
             pads.mapIndexed { index, pad -> pad.setImageResource(padImage(index)) }
@@ -67,10 +70,13 @@ class PadFragment : Fragment() {
         }
     }
 
-    private fun setSounds(list: List<Int?>) {
-        for ((index, resId) in list.withIndex()) {
-            if (resId != null) {
-                mediaPlayers[index] = MediaPlayer.create(activity, resId)
+    private fun setSounds(list: List<AssignedSound?>) {
+        for ((index, sound) in list.withIndex()) {
+            if (sound != null) {
+                if (sound.isRaw) mediaPlayers[index] =
+                    sound.rawId?.let { MediaPlayer.create(activity, it) }
+                else mediaPlayers[index] =
+                    sound.urlStr?.let { MediaPlayer.create(activity, Uri.parse(it)) }
             } else {
                 mediaPlayers[index] = null
             }

@@ -3,7 +3,7 @@ package dev.touyou.checkitoutandroid.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import dev.touyou.checkitoutandroid.R
+import dev.touyou.checkitoutandroid.entity.AssignedSound
 import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.entity.SoundData
 import dev.touyou.checkitoutandroid.entity.soundDao
@@ -16,13 +16,13 @@ class PadViewModel : ViewModel() {
     }
 
     val assignedSound by lazy {
-        MutableLiveData<List<Int?>>(sounds.toList())
+        MutableLiveData<List<AssignedSound?>>(sounds.toList())
     }
     var currentMode = MutableLiveData<PlayMode>(PlayMode.PLAY)
     var selectedPad: Int? = null
 
-    var sounds = mutableListOf(
-        R.raw.touyou, R.raw.chekera_cut, R.raw.minnade_cut, null,
+    var sounds = mutableListOf<AssignedSound?>(
+        null, null, null, null,
         null, null, null, null,
         null, null, null, null,
         null, null, null, null
@@ -33,8 +33,15 @@ class PadViewModel : ViewModel() {
         super.onCleared()
     }
 
-    fun changeSound(index: Int, resId: Int) {
-        sounds[index] = resId
+    fun changeSound(index: Int, sound: AssignedSound) {
+        sounds[index] = sound
+        assignedSound.value = sounds.toList()
+    }
+
+    fun changeSoundAll(list: MutableList<SoundData>) {
+        for (data in list) {
+            if (data.padNum != -1) sounds[data.padNum] = data.toAssignedSound()
+        }
         assignedSound.value = sounds.toList()
     }
 

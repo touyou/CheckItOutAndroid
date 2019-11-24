@@ -37,6 +37,7 @@ class ControlFragment : Fragment() {
         var soundList = realm.where(SoundData::class.java).findAll().toMutableList()
         viewModel.getSoundData().observe(viewLifecycleOwner, Observer {
             soundList = it.toMutableList()
+            viewModel.changeSoundAll(soundList)
         })
 
         soundRecyclerView.adapter = SoundViewAdapter(soundList)

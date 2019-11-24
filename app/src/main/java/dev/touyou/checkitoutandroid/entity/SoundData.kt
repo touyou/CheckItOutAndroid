@@ -10,4 +10,12 @@ open class SoundData(
     var rawId: Int? = null,
     var displayName: String = "",
     var padNum: Int = -1
-) : RealmObject()
+) : RealmObject() {
+    fun toAssignedSound() = AssignedSound(this.isRaw, this.urlStr, this.rawId)
+}
+
+data class AssignedSound(
+    var isRaw: Boolean = false,
+    var urlStr: String? = null,
+    var rawId: Int? = null
+)
