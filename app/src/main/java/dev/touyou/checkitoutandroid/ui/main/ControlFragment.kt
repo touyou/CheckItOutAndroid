@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.touyou.checkitoutandroid.R
+import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.entity.SoundData
 import io.realm.Realm
 import kotlinx.android.synthetic.main.control_fragment.*
@@ -20,6 +21,7 @@ class ControlFragment : Fragment() {
     }
 
     private lateinit var viewModel: PadViewModel
+    private lateinit var adapter: SoundViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,8 +41,19 @@ class ControlFragment : Fragment() {
             soundList = it.toMutableList()
             viewModel.changeSoundAll(soundList)
         })
+        adapter = SoundViewAdapter(soundList)
+        adapter.setOnItemClickListener(object : SoundViewAdapter.onItemClickListener {
+            override fun onClick(view: View, position: Int) {
+                viewModel.selectedPad?.let {
+                    if (viewModel.currentMode.value == PlayMode.EDIT) {
+                        viewModel.changeSound(it, soundList[position])
+                        viewModel.selectedPad = null
+                    }
+                }
+            }
+        })
 
-        soundRecyclerView.adapter = SoundViewAdapter(soundList)
+        soundRecyclerView.adapter = adapter
         soundRecyclerView.layoutManager = LinearLayoutManager(context)
     }
 

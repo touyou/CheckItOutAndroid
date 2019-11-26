@@ -33,8 +33,9 @@ class PadViewModel : ViewModel() {
         super.onCleared()
     }
 
-    fun changeSound(index: Int, sound: AssignedSound) {
-        sounds[index] = sound
+    fun changeSound(index: Int, sound: SoundData) {
+        realm.soundDao().assignPad(sound.id, index)
+        sounds[index] = sound.toAssignedSound()
         assignedSound.value = sounds.toList()
     }
 
