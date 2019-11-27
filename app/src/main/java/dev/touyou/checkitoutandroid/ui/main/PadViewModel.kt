@@ -40,6 +40,7 @@ class PadViewModel : ViewModel() {
     }
 
     fun changeSoundAll(list: MutableList<SoundData>) {
+        sounds.fill(null)
         for (data in list) {
             if (data.padNum != -1) sounds[data.padNum] = data.toAssignedSound()
         }

@@ -71,6 +71,9 @@ class PadFragment : Fragment() {
     }
 
     private fun setSounds(list: List<AssignedSound?>) {
+        pads.mapIndexed { idx, imageView ->
+            imageView.setImageResource(padImage(idx))
+        }
         for ((index, sound) in list.withIndex()) {
             if (sound != null) {
                 if (sound.isRaw) mediaPlayers[index] =

@@ -22,6 +22,7 @@ class ControlFragment : Fragment() {
 
     private lateinit var viewModel: PadViewModel
     private lateinit var adapter: SoundViewAdapter
+    private lateinit var mode: PlayMode
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,19 +36,26 @@ class ControlFragment : Fragment() {
         viewModel = activity?.let { ViewModelProviders.of(it).get(PadViewModel::class.java) }
             ?: throw Exception("Invalid Activity")
 
+        changeMode(PlayMode.PLAY)
+        viewModel.currentMode.observe(viewLifecycleOwner, Observer {
+            changeMode(it)
+        })
+
         val realm = Realm.getDefaultInstance()
         var soundList = realm.where(SoundData::class.java).findAll().toMutableList()
         viewModel.getSoundData().observe(viewLifecycleOwner, Observer {
             soundList = it.toMutableList()
             viewModel.changeSoundAll(soundList)
+            adapter.notifyDataSetChanged()
         })
         adapter = SoundViewAdapter(soundList)
         adapter.setOnItemClickListener(object : SoundViewAdapter.onItemClickListener {
             override fun onClick(view: View, position: Int) {
                 viewModel.selectedPad?.let {
-                    if (viewModel.currentMode.value == PlayMode.EDIT) {
+                    if (mode == PlayMode.EDIT) {
                         viewModel.changeSound(it, soundList[position])
                         viewModel.selectedPad = null
+                        adapter.notifyItemChanged(position)
                     }
                 }
             }
@@ -57,4 +65,7 @@ class ControlFragment : Fragment() {
         soundRecyclerView.layoutManager = LinearLayoutManager(context)
     }
 
+    private fun changeMode(mode: PlayMode) {
+        this.mode = mode
+    }
 }
