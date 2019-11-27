@@ -67,5 +67,9 @@ class ControlFragment : Fragment() {
 
     private fun changeMode(mode: PlayMode) {
         this.mode = mode
+        when (mode) {
+            PlayMode.REC -> recBaseView.visibility = View.VISIBLE
+            else -> recBaseView.visibility = View.INVISIBLE
+        }
     }
 }

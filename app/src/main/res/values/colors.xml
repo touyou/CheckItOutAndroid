@@ -5,5 +5,6 @@
     <color name="colorAccent">#D81B60</color>
     <color name="cellGray">#636668</color>
     <color name="backgroundLightGray">#AAAAAA</color>
+    <color name="waveBackground">#636668</color>
     <color name="textGray">#564F4F</color>
 </resources>
