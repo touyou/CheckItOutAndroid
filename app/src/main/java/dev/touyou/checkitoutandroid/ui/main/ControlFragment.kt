@@ -1,5 +1,7 @@
 package dev.touyou.checkitoutandroid.ui.main
 
+import android.media.AudioFormat
+import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Bundle
@@ -26,6 +28,9 @@ import java.util.*
 class ControlFragment : Fragment() {
 
     companion object {
+        const val SAMPLING_RATE = 44100
+        const val CHANNEL_MASK = AudioFormat.CHANNEL_IN_MONO
+        const val ENCODING = AudioFormat.ENCODING_PCM_8BIT
         fun newInstance() = ControlFragment()
     }
 
@@ -36,6 +41,23 @@ class ControlFragment : Fragment() {
     private var recorder: MediaRecorder? = null
     private var file: File? = null
     private var visualizerManager: NierVisualizerManager? = null
+
+    private val audioBufferSize by lazy {
+        AudioRecord.getMinBufferSize(
+            SAMPLING_RATE,
+            CHANNEL_MASK,
+            ENCODING
+        )
+    }
+    private val audioRecord by lazy {
+        AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            SAMPLING_RATE,
+            CHANNEL_MASK,
+            ENCODING,
+            audioBufferSize
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -84,9 +106,12 @@ class ControlFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-        recorder?.release()
         visualizerManager?.release()
+        visualizerManager = null
         player?.release()
+        audioRecord.release()
+        recorder?.release()
+        file?.delete()
     }
 
     private fun changeMode(mode: PlayMode) {
@@ -115,11 +140,6 @@ class ControlFragment : Fragment() {
         recorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
         recorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
-//        visualizerManager = NierVisualizerManager()
-//        if (visualizerManager?.init(0) != NierVisualizerManager.SUCCESS) {
-//            visualizerManager = null
-//        }
-
         var state = false
         recRecButton.setOnClickListener {
             if (file == null) {
@@ -128,12 +148,13 @@ class ControlFragment : Fragment() {
                 file = File(context?.filesDir, "$fileName.mp3")
 
                 recorder?.setOutputFile(file)
+                createNewVisualizerManager(1)
+                visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
                 try {
                     recorder?.prepare()
                     recorder?.start()
+                    audioRecord.startRecording()
                     state = true
-
-                    visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
                 } catch (e: IllegalStateException) {
                     e.printStackTrace()
                 } catch (e: IOException) {
@@ -152,6 +173,8 @@ class ControlFragment : Fragment() {
             player?.setDataSource(file?.absolutePath)
             player?.prepare()
             player?.start()
+            createNewVisualizerManager(0)
+            visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
         }
         saveRecButton.setOnClickListener {
             if (state) return@setOnClickListener
@@ -169,9 +192,51 @@ class ControlFragment : Fragment() {
     }
 
     private fun stopRecording() {
+        visualizerManager?.pause()
+        audioRecord.stop()
         recorder?.stop()
         recorder?.release()
         visualizerManager?.stop()
         visualizerManager?.release()
+    }
+
+    private fun createNewVisualizerManager(mode: Int) {
+        visualizerManager?.release()
+        visualizerManager = NierVisualizerManager().apply {
+            when (mode) {
+                0 -> init(player!!.audioSessionId)
+                1 -> {
+                    init(object : NierVisualizerManager.NVDataSource {
+                        private val buffer: ByteArray = ByteArray(512)
+                        private val audioRecordByteBuffer by lazy {
+                            ByteArray(audioBufferSize / 2)
+                        }
+                        private val audioLength =
+                            (audioRecordByteBuffer.size * 1000f / SAMPLING_RATE).toInt()
+
+                        override fun getDataSamplingInterval() = 0L
+
+                        override fun getDataLength() = buffer.size
+
+                        override fun fetchFftData(): ByteArray? {
+                            return null
+                        }
+
+                        override fun fetchWaveData(): ByteArray? {
+                            if (audioRecord.recordingState != AudioRecord.RECORDSTATE_RECORDING) return null
+                            audioRecordByteBuffer.fill(0)
+                            audioRecord.read(audioRecordByteBuffer, 0, audioRecordByteBuffer.size)
+                            var tempCounter = 0
+                            for (idx in audioRecordByteBuffer.indices step (audioRecordByteBuffer.size / (audioLength + buffer.size))) {
+                                if (tempCounter >= buffer.size) break
+                                buffer[tempCounter++] = audioRecordByteBuffer[idx]
+                            }
+                            return buffer
+                        }
+                    })
+                }
+                else -> return
+            }
+        }
     }
 }
