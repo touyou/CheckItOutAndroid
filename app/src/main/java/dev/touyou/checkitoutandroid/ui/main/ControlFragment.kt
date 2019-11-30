@@ -41,6 +41,7 @@ class ControlFragment : Fragment() {
     private var recorder: MediaRecorder? = null
     private var file: File? = null
     private var visualizerManager: NierVisualizerManager? = null
+    private var state: Boolean = false
 
     private val audioBufferSize by lazy {
         AudioRecord.getMinBufferSize(
@@ -126,24 +127,24 @@ class ControlFragment : Fragment() {
                     stopRecording()
                     it.delete()
                     file = null
+                    displayNameText.setText("")
                 }
             }
         }
     }
 
     private fun setupRecMode() {
-        recorder = MediaRecorder()
-        recorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-        recorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        recorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-
-        var state = false
+        state = false
         recRecButton.setOnClickListener {
             if (file == null) {
                 val date = Date()
                 val fileName = DateFormat.format("yyyy_MM_dd_kk-mm-ss", date)
                 file = File(context?.filesDir, "$fileName.mp3")
 
+                recorder = MediaRecorder()
+                recorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+                recorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                recorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 recorder?.setOutputFile(file)
                 createNewVisualizerManager(1)
                 visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
@@ -166,12 +167,14 @@ class ControlFragment : Fragment() {
         playRecButton.setOnClickListener {
             if (state) return@setOnClickListener
             if (player?.isPlaying == true) return@setOnClickListener
-            player = MediaPlayer()
-            player?.setDataSource(file?.absolutePath)
-            player?.prepare()
-            player?.start()
-            createNewVisualizerManager(0)
-            visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
+            file?.let {
+                player = MediaPlayer()
+                player?.setDataSource(it.absolutePath)
+                player?.prepare()
+                player?.start()
+                createNewVisualizerManager(0)
+                visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
+            }
         }
         saveRecButton.setOnClickListener {
             if (state) return@setOnClickListener
@@ -191,8 +194,10 @@ class ControlFragment : Fragment() {
     private fun stopRecording() {
         visualizerManager?.pause()
         audioRecord.stop()
-        recorder?.stop()
-        recorder?.release()
+        if (state) {
+            recorder?.stop()
+            recorder?.release()
+        }
         visualizerManager?.stop()
         visualizerManager?.release()
     }
