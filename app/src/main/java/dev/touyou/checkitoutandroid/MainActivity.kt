@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModelProviders
 import dev.touyou.checkitoutandroid.entity.PlayMode
-import dev.touyou.checkitoutandroid.entity.soundDao
 import dev.touyou.checkitoutandroid.ui.main.ControlFragment
 import dev.touyou.checkitoutandroid.ui.main.PadFragment
 import dev.touyou.checkitoutandroid.ui.main.PadViewModel
@@ -40,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(PadViewModel::class.java)
 
         initSounds()
-
+        println(viewModel.sounds)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.padContainer, PadFragment.newInstance())
@@ -58,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        if (grantResults.isEmpty()) return
         when (requestCode) {
             REQUEST_CODE_AUDIO_PERMISSION -> {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
@@ -117,10 +117,9 @@ class MainActivity : AppCompatActivity() {
     private fun initSounds() {
         val prefs = getSharedPreferences(prefName, privateMode)
         if (!prefs.getBoolean(prefName, false)) {
-            val realm = Realm.getDefaultInstance()
-            realm.soundDao().addToSound("バスドラ", 0, rawId = R.raw.touyou)
-            realm.soundDao().addToSound("みんなで", 1, rawId = R.raw.minnade_cut)
-            realm.soundDao().addToSound("チェケラ", 2, rawId = R.raw.chekera_cut)
+            viewModel.addSound("バスドラ", 0, rawId = R.raw.touyou, id = 0)
+            viewModel.addSound("みんなで", 1, rawId = R.raw.minnade_cut, id = 1)
+            viewModel.addSound("チェケラ", 2, rawId = R.raw.chekera_cut, id = 2)
 
             prefs.edit {
                 this.putBoolean(prefName, true)

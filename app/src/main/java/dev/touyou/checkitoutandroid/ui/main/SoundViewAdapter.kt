@@ -9,9 +9,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import dev.touyou.checkitoutandroid.R
 import dev.touyou.checkitoutandroid.entity.SoundData
+import io.realm.OrderedRealmCollection
+import io.realm.RealmRecyclerViewAdapter
 
-class SoundViewAdapter(private val soundList: List<SoundData>) :
-    RecyclerView.Adapter<SoundViewAdapter.SoundViewHolder>() {
+class SoundViewAdapter(
+    private val soundList: OrderedRealmCollection<SoundData>?,
+    private val autoUpdate: Boolean
+) :
+    RealmRecyclerViewAdapter<SoundData, SoundViewAdapter.SoundViewHolder>(soundList, autoUpdate) {
     private var listener: onItemClickListener? = null
 
     class SoundViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,13 +36,14 @@ class SoundViewAdapter(private val soundList: List<SoundData>) :
             )
         )
 
-    override fun getItemCount(): Int = soundList.size
+    override fun getItemCount(): Int = soundList?.size ?: 0
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: SoundViewHolder, position: Int) {
-        holder.soundNameTextView.text = soundList[position].displayName
+        val soundData = soundList?.get(position) ?: return
+        holder.soundNameTextView.text = soundData.displayName
         holder.padTextView.text =
-            if (soundList[position].padNum == -1) "NONE" else "PAD ${soundList[position].padNum + 1}"
+            if (soundData.padNum == -1) "NONE" else "PAD ${soundData.padNum + 1}"
         holder.baseLayout.setOnClickListener {
             listener?.onClick(it, position)
         }

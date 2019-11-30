@@ -11,13 +11,14 @@ class SoundDao(val realm: Realm) {
         displayName: String,
         padNum: Int = -1,
         urlStr: String? = null,
-        rawId: Int? = null
+        rawId: Int? = null,
+        id: Long? = null
     ) {
         realm.executeTransactionAsync {
             val sounds = it.where(SoundData::class.java).findAll().sort("id")
             val lastId = if (sounds.isEmpty()) -1 else sounds.last()!!.id
             val sound = SoundData()
-            sound.id = lastId + 1
+            sound.id = id ?: lastId + 1
             sound.displayName = displayName
             sound.padNum = padNum
             sound.isRaw = rawId != null
@@ -36,13 +37,12 @@ class SoundDao(val realm: Realm) {
     }
 
     fun getSound(): LiveData<RealmResults<SoundData>> {
-        return realm.where(SoundData::class.java).findAllAsync().asLiveData()
+        return realm.where(SoundData::class.java).findAllAsync().sort("id").asLiveData()
     }
 
-    fun deleteAll() {
+    fun delete(data: SoundData) {
         realm.executeTransactionAsync {
-            val result = it.where(SoundData::class.java).findAll()
-            result.deleteAllFromRealm()
+            data.deleteFromRealm()
         }
     }
 }

@@ -33,6 +33,24 @@ class PadViewModel : ViewModel() {
         super.onCleared()
     }
 
+    fun initSounds() {
+        val soundData = realm.where(SoundData::class.java).findAll()
+        for (sound in soundData) {
+            if (sound.padNum != -1) {
+                sounds[sound.padNum] = sound.toAssignedSound()
+            }
+        }
+        assignedSound.value = sounds.toList()
+    }
+
+    fun addSound(name: String, padNum: Int = -1, rawId: Int, id: Long) {
+        realm.soundDao().addToSound(name, padNum, rawId = rawId, id = id)
+        if (padNum != -1) {
+            sounds[padNum] = AssignedSound(isRaw = true, rawId = rawId)
+            assignedSound.value = sounds.toList()
+        }
+    }
+
     fun addSound(name: String, filePath: String) {
         realm.soundDao().addToSound(displayName = name, urlStr = filePath)
     }

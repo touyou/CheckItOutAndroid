@@ -77,19 +77,16 @@ class ControlFragment : Fragment() {
         })
 
         val realm = Realm.getDefaultInstance()
-        var soundList = realm.where(SoundData::class.java).findAll().toMutableList()
+        val soundList = realm.where(SoundData::class.java).findAll().sort("id")
         viewModel.getSoundData().observe(viewLifecycleOwner, Observer {
-            soundList = it.toMutableList()
-            println("update realm data: $soundList")
-            viewModel.changeSoundAll(soundList)
-            adapter.notifyDataSetChanged()
+            viewModel.changeSoundAll(it.toMutableList())
         })
-        adapter = SoundViewAdapter(soundList)
+        adapter = SoundViewAdapter(soundList, true)
         adapter.setOnItemClickListener(object : SoundViewAdapter.onItemClickListener {
             override fun onClick(view: View, position: Int) {
                 viewModel.selectedPad?.let {
                     if (mode == PlayMode.EDIT) {
-                        viewModel.changeSound(it, soundList[position])
+                        viewModel.changeSound(it, soundList[position] ?: return@let)
                         viewModel.selectedPad = null
                         adapter.notifyItemChanged(position)
                     }

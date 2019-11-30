@@ -60,6 +60,8 @@ class PadFragment : Fragment() {
             pads.mapIndexed { index, pad -> pad.setImageResource(padImage(index)) }
             changePadTouchListener(it)
         })
+
+        viewModel.initSounds()
     }
 
     override fun onDestroy() {
