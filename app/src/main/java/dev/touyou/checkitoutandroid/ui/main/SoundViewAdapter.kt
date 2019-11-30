@@ -36,7 +36,8 @@ class SoundViewAdapter(private val soundList: List<SoundData>) :
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: SoundViewHolder, position: Int) {
         holder.soundNameTextView.text = soundList[position].displayName
-        holder.padTextView.text = "PAD ${soundList[position].padNum + 1}"
+        holder.padTextView.text =
+            if (soundList[position].padNum == -1) "NONE" else "PAD ${soundList[position].padNum + 1}"
         holder.baseLayout.setOnClickListener {
             listener?.onClick(it, position)
         }

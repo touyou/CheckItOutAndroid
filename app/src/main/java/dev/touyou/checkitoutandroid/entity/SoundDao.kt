@@ -7,7 +7,12 @@ import io.realm.RealmResults
 
 class SoundDao(val realm: Realm) {
 
-    fun addToSound(displayName: String, padNum: Int, urlStr: String? = null, rawId: Int? = null) {
+    fun addToSound(
+        displayName: String,
+        padNum: Int = -1,
+        urlStr: String? = null,
+        rawId: Int? = null
+    ) {
         realm.executeTransactionAsync {
             val sounds = it.where(SoundData::class.java).findAll().sort("id")
             val lastId = if (sounds.isEmpty()) -1 else sounds.last()!!.id

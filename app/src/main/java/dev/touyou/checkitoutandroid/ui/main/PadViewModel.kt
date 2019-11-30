@@ -33,6 +33,10 @@ class PadViewModel : ViewModel() {
         super.onCleared()
     }
 
+    fun addSound(name: String, filePath: String) {
+        realm.soundDao().addToSound(displayName = name, urlStr = filePath)
+    }
+
     fun changeSound(index: Int, sound: SoundData) {
         realm.soundDao().assignPad(sound.id, index)
         sounds[index] = sound.toAssignedSound()

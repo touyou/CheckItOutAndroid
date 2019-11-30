@@ -34,7 +34,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.chibde.visualizer.LineBarVisualizer
+        <SurfaceView
             android:id="@+id/visualizer"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -60,32 +60,44 @@
             app:layout_constraintVertical_bias="1.0">
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/recRecButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="REC" />
+                android:background="#00FFFFFF"
+                android:fontFamily="@font/logotypejp_mp_b_1"
+                android:text="REC"
+                android:textColor="@android:color/white" />
 
             <Button
-                android:id="@+id/button3"
+                android:id="@+id/stopRecButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="STOP" />
+                android:background="#00FFFFFF"
+                android:fontFamily="@font/logotypejp_mp_b_1"
+                android:text="STOP"
+                android:textColor="@android:color/white" />
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/playRecButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="PLAY" />
+                android:background="#00FFFFFF"
+                android:fontFamily="@font/logotypejp_mp_b_1"
+                android:text="PLAY"
+                android:textColor="@android:color/white" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/saveRecButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="SAVE" />
+                android:background="#00FFFFFF"
+                android:fontFamily="@font/logotypejp_mp_b_1"
+                android:text="SAVE"
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
