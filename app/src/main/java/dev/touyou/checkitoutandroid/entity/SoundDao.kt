@@ -1,48 +1,52 @@
 package dev.touyou.checkitoutandroid.entity
 
 import androidx.lifecycle.LiveData
-import dev.touyou.checkitoutandroid.helper.asLiveData
-import io.realm.Realm
-import io.realm.RealmResults
+import androidx.lifecycle.asLiveData
+import io.realm.kotlin.Realm
+import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.RealmResults
+import kotlinx.coroutines.flow.map
 
-class SoundDao(val realm: Realm) {
+class SoundDao(private val realm: Realm) {
 
-    fun addToSound(
+    suspend fun addToSound(
         displayName: String,
         padNum: Int = -1,
         urlStr: String? = null,
         rawId: Int? = null,
         id: Long? = null
     ) {
-        realm.executeTransactionAsync {
-            val sounds = it.where(SoundData::class.java).findAll().sort("id")
-            val lastId = if (sounds.isEmpty()) -1 else sounds.last()!!.id
-            val sound = SoundData()
-            sound.id = id ?: lastId + 1
-            sound.displayName = displayName
-            sound.padNum = padNum
-            sound.isRaw = rawId != null
-            sound.urlStr = urlStr
-            sound.rawId = rawId
-            it.insert(sound)
+        realm.write {
+            val sounds = query<SoundData>().find().sortedBy { it.id }
+            val lastId = if (sounds.isEmpty()) -1 else sounds.last().id
+            val sound = SoundData().apply {
+                this.id = id ?: lastId + 1
+                this.displayName = displayName
+                this.padNum = padNum
+                this.isRaw = rawId != null
+                this.urlStr = urlStr
+                this.rawId = rawId
+            }
+            copyToRealm(sound)
         }
     }
 
-    fun assignPad(id: Long, padId: Int) {
-        realm.executeTransactionAsync {
-            val sounds = it.where(SoundData::class.java).findAll()
+    suspend fun assignPad(id: Long, padId: Int) {
+        realm.write {
+            val sounds = query<SoundData>().find()
             sounds.find { it.padNum == padId }?.padNum = -1
             sounds.find { it.id == id }?.padNum = padId
         }
     }
 
-    fun getSound(): LiveData<RealmResults<SoundData>> {
-        return realm.where(SoundData::class.java).findAllAsync().sort("id").asLiveData()
+    fun getSound(): LiveData<List<SoundData>> {
+        return realm.query<SoundData>().sort("id").asFlow().map { it.list }.asLiveData()
     }
 
-    fun delete(data: SoundData) {
-        realm.executeTransactionAsync {
-            data.deleteFromRealm()
+    suspend fun delete(data: SoundData) {
+        realm.write {
+            val soundToDelete = query<SoundData>("id == $0", data.id).first().find()
+            soundToDelete?.let { delete(it) }
         }
     }
 }

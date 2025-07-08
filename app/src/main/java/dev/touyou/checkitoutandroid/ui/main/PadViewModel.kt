@@ -3,16 +3,24 @@ package dev.touyou.checkitoutandroid.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.touyou.checkitoutandroid.entity.AssignedSound
 import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.entity.SoundData
 import dev.touyou.checkitoutandroid.entity.soundDao
-import io.realm.Realm
-import io.realm.RealmResults
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.RealmResults
+import kotlinx.coroutines.launch
 
 class PadViewModel : ViewModel() {
     private val realm: Realm by lazy {
-        Realm.getDefaultInstance()
+        val config = RealmConfiguration.Builder(schema = setOf(SoundData::class))
+            .name("sounddb.realm")
+            .schemaVersion(1)
+            .build()
+        Realm.open(config)
     }
 
     val assignedSound by lazy {
@@ -34,7 +42,7 @@ class PadViewModel : ViewModel() {
     }
 
     fun initSounds() {
-        val soundData = realm.where(SoundData::class.java).findAll()
+        val soundData = realm.query<SoundData>().find()
         for (sound in soundData) {
             if (sound.padNum != -1) {
                 sounds[sound.padNum] = sound.toAssignedSound()
@@ -44,21 +52,27 @@ class PadViewModel : ViewModel() {
     }
 
     fun addSound(name: String, padNum: Int = -1, rawId: Int, id: Long) {
-        realm.soundDao().addToSound(name, padNum, rawId = rawId, id = id)
-        if (padNum != -1) {
-            sounds[padNum] = AssignedSound(isRaw = true, rawId = rawId)
-            assignedSound.value = sounds.toList()
+        viewModelScope.launch {
+            realm.soundDao().addToSound(name, padNum, rawId = rawId, id = id)
+            if (padNum != -1) {
+                sounds[padNum] = AssignedSound(isRaw = true, rawId = rawId)
+                assignedSound.value = sounds.toList()
+            }
         }
     }
 
     fun addSound(name: String, filePath: String) {
-        realm.soundDao().addToSound(displayName = name, urlStr = filePath)
+        viewModelScope.launch {
+            realm.soundDao().addToSound(displayName = name, urlStr = filePath)
+        }
     }
 
     fun changeSound(index: Int, sound: SoundData) {
-        realm.soundDao().assignPad(sound.id, index)
-        sounds[index] = sound.toAssignedSound()
-        assignedSound.value = sounds.toList()
+        viewModelScope.launch {
+            realm.soundDao().assignPad(sound.id, index)
+            sounds[index] = sound.toAssignedSound()
+            assignedSound.value = sounds.toList()
+        }
     }
 
     fun changeSoundAll(list: MutableList<SoundData>) {
@@ -74,7 +88,7 @@ class PadViewModel : ViewModel() {
         if (mode != PlayMode.EDIT) selectedPad = null
     }
 
-    fun getSoundData(): LiveData<RealmResults<SoundData>> {
+    fun getSoundData(): LiveData<List<SoundData>> {
         return realm.soundDao().getSound()
     }
 }

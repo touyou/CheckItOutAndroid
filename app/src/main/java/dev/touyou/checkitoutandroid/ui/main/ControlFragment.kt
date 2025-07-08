@@ -12,13 +12,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.touyou.checkitoutandroid.R
+import dev.touyou.checkitoutandroid.databinding.ControlFragmentBinding
 import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.entity.SoundData
-import io.realm.Realm
-import kotlinx.android.synthetic.main.control_fragment.*
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.ext.query
 import me.bogerchan.niervisualizer.NierVisualizerManager
 import me.bogerchan.niervisualizer.renderer.columnar.ColumnarType1Renderer
 import java.io.File
@@ -42,6 +44,8 @@ class ControlFragment : Fragment() {
     private var file: File? = null
     private var visualizerManager: NierVisualizerManager? = null
     private var state: Boolean = false
+    private var _binding: ControlFragmentBinding? = null
+    private val binding get() = _binding!!
 
     private val audioBufferSize by lazy {
         AudioRecord.getMinBufferSize(
@@ -63,13 +67,14 @@ class ControlFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.control_fragment, container, false)
+    ): View {
+        _binding = ControlFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = activity?.let { ViewModelProviders.of(it).get(PadViewModel::class.java) }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = activity?.let { ViewModelProvider(it)[PadViewModel::class.java] }
             ?: throw Exception("Invalid Activity")
 
         changeMode(PlayMode.PLAY)
@@ -77,32 +82,43 @@ class ControlFragment : Fragment() {
             changeMode(it)
         })
 
-        val realm = Realm.getDefaultInstance()
-        val soundList = realm.where(SoundData::class.java).findAll().sort("id")
-        viewModel.getSoundData().observe(viewLifecycleOwner, Observer {
-            viewModel.changeSoundAll(it.toMutableList())
+        val config = RealmConfiguration.Builder(schema = setOf(SoundData::class))
+            .name("sounddb.realm")
+            .schemaVersion(1)
+            .build()
+        val realm = Realm.open(config)
+        val soundList = realm.query<SoundData>().sort("id").find()
+
+        adapter = SoundViewAdapter(soundList.toList(), true)
+        viewModel.getSoundData().observe(viewLifecycleOwner, Observer { soundDataList ->
+            adapter.updateData(soundDataList)
+            viewModel.changeSoundAll(soundDataList.toMutableList())
         })
-        adapter = SoundViewAdapter(soundList, true)
+
         adapter.setOnItemClickListener(object : SoundViewAdapter.onItemClickListener {
             override fun onClick(view: View, position: Int) {
                 viewModel.selectedPad?.let {
                     if (mode == PlayMode.EDIT) {
-                        viewModel.changeSound(it, soundList[position] ?: return@let)
-                        viewModel.selectedPad = null
-                        adapter.notifyItemChanged(position)
+                        val soundData = adapter.getItem(position)
+                        if (soundData != null) {
+                            viewModel.changeSound(it, soundData)
+                            viewModel.selectedPad = null
+                            adapter.notifyItemChanged(position)
+                        }
                     }
                 }
             }
         })
 
-        soundRecyclerView.adapter = adapter
-        soundRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.soundRecyclerView.adapter = adapter
+        binding.soundRecyclerView.layoutManager = LinearLayoutManager(context)
 
         setupRecMode()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
 
         visualizerManager?.release()
         visualizerManager = null
@@ -115,9 +131,9 @@ class ControlFragment : Fragment() {
     private fun changeMode(mode: PlayMode) {
         this.mode = mode
         when (mode) {
-            PlayMode.REC -> recBaseView.visibility = View.VISIBLE
+            PlayMode.REC -> binding.recBaseView.visibility = View.VISIBLE
             else -> {
-                recBaseView.visibility = View.INVISIBLE
+                binding.recBaseView.visibility = View.INVISIBLE
                 player?.let {
                     it.stop()
                     it.release()
@@ -127,7 +143,7 @@ class ControlFragment : Fragment() {
                     stopRecording()
                     it.delete()
                     file = null
-                    displayNameText.setText("")
+                    binding.displayNameText.setText("")
                 }
             }
         }
@@ -135,19 +151,24 @@ class ControlFragment : Fragment() {
 
     private fun setupRecMode() {
         state = false
-        recRecButton.setOnClickListener {
+        binding.recRecButton.setOnClickListener {
             if (file == null) {
                 val date = Date()
                 val fileName = DateFormat.format("yyyy_MM_dd_kk-mm-ss", date)
                 file = File(context?.filesDir, "$fileName.mp3")
 
-                recorder = MediaRecorder()
+                recorder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    MediaRecorder(requireContext())
+                } else {
+                    @Suppress("DEPRECATION")
+                    MediaRecorder()
+                }
                 recorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
                 recorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 recorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 recorder?.setOutputFile(file)
                 createNewVisualizerManager(1)
-                visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
+                visualizerManager?.start(binding.visualizer, arrayOf(ColumnarType1Renderer()))
                 try {
                     recorder?.prepare()
                     recorder?.start()
@@ -160,11 +181,11 @@ class ControlFragment : Fragment() {
                 }
             }
         }
-        stopRecButton.setOnClickListener {
+        binding.stopRecButton.setOnClickListener {
             stopRecording()
             state = false
         }
-        playRecButton.setOnClickListener {
+        binding.playRecButton.setOnClickListener {
             if (state) return@setOnClickListener
             if (player?.isPlaying == true) return@setOnClickListener
             file?.let {
@@ -173,18 +194,18 @@ class ControlFragment : Fragment() {
                 player?.prepare()
                 player?.start()
                 createNewVisualizerManager(0)
-                visualizerManager?.start(visualizer, arrayOf(ColumnarType1Renderer()))
+                visualizerManager?.start(binding.visualizer, arrayOf(ColumnarType1Renderer()))
             }
         }
-        saveRecButton.setOnClickListener {
+        binding.saveRecButton.setOnClickListener {
             if (state) return@setOnClickListener
             file?.let {
-                if (displayNameText.text.isBlank()) {
+                if (binding.displayNameText.text.isBlank()) {
                     Toast.makeText(context, "名前を入力してください。", Toast.LENGTH_SHORT).show()
                 } else {
-                    viewModel.addSound(displayNameText.text.toString(), it.absolutePath)
+                    viewModel.addSound(binding.displayNameText.text.toString(), it.absolutePath)
                     file = null
-                    displayNameText.setText("")
+                    binding.displayNameText.setText("")
                     Toast.makeText(context, "保存しました。", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -228,6 +249,11 @@ class ControlFragment : Fragment() {
                             if (audioRecord.recordingState != AudioRecord.RECORDSTATE_RECORDING) return null
                             audioRecordByteBuffer.fill(0)
                             audioRecord.read(audioRecordByteBuffer, 0, audioRecordByteBuffer.size)
+                            if (audioRecordByteBuffer.isEmpty()) return null
+                            if (audioLength <= 0) return null
+                            if (audioRecordByteBuffer.size < audioLength + buffer.size) {
+                                return null
+                            }
                             var tempCounter = 0
                             for (idx in audioRecordByteBuffer.indices step (audioRecordByteBuffer.size / (audioLength + buffer.size))) {
                                 if (tempCounter >= buffer.size) break

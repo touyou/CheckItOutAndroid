@@ -7,14 +7,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
+import dev.touyou.checkitoutandroid.databinding.MainActivityBinding
 import dev.touyou.checkitoutandroid.entity.PlayMode
+import dev.touyou.checkitoutandroid.entity.SoundData
 import dev.touyou.checkitoutandroid.ui.main.ControlFragment
 import dev.touyou.checkitoutandroid.ui.main.PadFragment
 import dev.touyou.checkitoutandroid.ui.main.PadViewModel
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import kotlinx.android.synthetic.main.main_activity.*
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -26,17 +27,20 @@ class MainActivity : AppCompatActivity() {
     private val prefName = "initial-run"
 
     lateinit var viewModel: PadViewModel
+    private lateinit var binding: MainActivityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
-        setContentView(R.layout.main_activity)
+
+        binding = MainActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         ensurePermissionAllowed()
 
         initRealm()
 
-        viewModel = ViewModelProviders.of(this).get(PadViewModel::class.java)
+        viewModel = ViewModelProvider(this)[PadViewModel::class.java]
 
         initSounds()
         println(viewModel.sounds)
@@ -84,33 +88,28 @@ class MainActivity : AppCompatActivity() {
 
     // IMO: move to application extended class ?
     private fun initRealm() {
-        Realm.init(this)
-        val config = RealmConfiguration.Builder()
-            .name("sounddb.realm")
-            .schemaVersion(1)
-            .build()
-        Realm.setDefaultConfiguration(config)
+        // Realm Kotlinでは特に初期化処理は不要
     }
 
     private fun initButton() {
-        playButton.alpha = 0.3f
-        playButton.setOnClickListener {
+        binding.playButton.alpha = 0.3f
+        binding.playButton.setOnClickListener {
             viewModel.changeMode(PlayMode.PLAY)
-            playButton.alpha = 0.3f
-            recButton.alpha = 1.0f
-            editButton.alpha = 1.0f
+            binding.playButton.alpha = 0.3f
+            binding.recButton.alpha = 1.0f
+            binding.editButton.alpha = 1.0f
         }
-        recButton.setOnClickListener {
+        binding.recButton.setOnClickListener {
             viewModel.changeMode(PlayMode.REC)
-            playButton.alpha = 1.0f
-            recButton.alpha = 0.3f
-            editButton.alpha = 1.0f
+            binding.playButton.alpha = 1.0f
+            binding.recButton.alpha = 0.3f
+            binding.editButton.alpha = 1.0f
         }
-        editButton.setOnClickListener {
+        binding.editButton.setOnClickListener {
             viewModel.changeMode(PlayMode.EDIT)
-            playButton.alpha = 1.0f
-            recButton.alpha = 1.0f
-            editButton.alpha = 0.3f
+            binding.playButton.alpha = 1.0f
+            binding.recButton.alpha = 1.0f
+            binding.editButton.alpha = 0.3f
         }
     }
 

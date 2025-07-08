@@ -10,11 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import dev.touyou.checkitoutandroid.R
+import dev.touyou.checkitoutandroid.databinding.MainFragmentBinding
 import dev.touyou.checkitoutandroid.entity.AssignedSound
 import dev.touyou.checkitoutandroid.entity.PlayMode
-import kotlinx.android.synthetic.main.main_fragment.*
 
 class PadFragment : Fragment() {
 
@@ -23,12 +23,15 @@ class PadFragment : Fragment() {
     }
 
     private lateinit var viewModel: PadViewModel
+    private var _binding: MainFragmentBinding? = null
+    private val binding get() = _binding!!
+
     private val pads by lazy {
         listOf(
-            pad1, pad2, pad3, pad4,
-            pad5, pad6, pad7, pad8,
-            pad9, pad10, pad11, pad12,
-            pad13, pad14, pad15, pad16
+            binding.pad1, binding.pad2, binding.pad3, binding.pad4,
+            binding.pad5, binding.pad6, binding.pad7, binding.pad8,
+            binding.pad9, binding.pad10, binding.pad11, binding.pad12,
+            binding.pad13, binding.pad14, binding.pad15, binding.pad16
         )
     }
     private var mediaPlayers: MutableList<MediaPlayer?> = mutableListOf(
@@ -42,12 +45,13 @@ class PadFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+        _binding = MainFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = activity?.let { ViewModelProviders.of(it).get(PadViewModel::class.java) }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = activity?.let { ViewModelProvider(it)[PadViewModel::class.java] }
             ?: throw Exception("Invalid Activity")
 
         setSounds(viewModel.sounds.toList())
@@ -64,8 +68,9 @@ class PadFragment : Fragment() {
         viewModel.initSounds()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
 
         for (mediaPlayer in mediaPlayers) {
             mediaPlayer?.release()
