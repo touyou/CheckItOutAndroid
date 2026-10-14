@@ -5,6 +5,9 @@ on:
     branches: [master]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,14 +24,16 @@ jobs:
         run: ./gradlew assembleDebug assembleRelease lintDebug
       # Play は targetSdk 35 以上のアプリに 16 KB ページサイズ対応を求める。ネイティブライブラリの LOAD セグメントが 16 KB 境界に揃っているかを見る
       - name: Check 16 KB page alignment
+        shell: bash
         run: |
           apk=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
           "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 -v 4 "$apk" | tail -n 3
           mkdir -p so && unzip -o -q "$apk" 'lib/*' -d so
           status=0
           for so in $(find so -name '*.so'); do
-            align=$(readelf -lW "$so" | awk '/LOAD/ {print $NF; exit}')
-            echo "$so $align"
-            if [ $((align)) -lt 16384 ]; then status=1; fi
+            for align in $(readelf -lW "$so" | awk '/LOAD/ {print $NF}'); do
+              echo "$so $align"
+              if [ $((align)) -lt 16384 ]; then status=1; fi
+            done
           done
           exit $status
