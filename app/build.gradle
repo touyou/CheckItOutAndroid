@@ -67,15 +67,15 @@ android {
     }
 }
 
-// versionCode は Play Console の最新値から自動採番する(手で上げ忘れて弾かれるのを防ぐ)
+// versionCode は Play Console の最新値から自動採番する(手で上げ忘れて弾かれるのを防ぐ)。
+// GPP 3.x は採番を assembleRelease にも差し込み資格情報を要求するので、鍵が無いときは plugin ごと無効にする
 play {
+    enabled.set(playServiceAccountFile.exists())
     track.set('internal')
     releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.COMPLETED)
     resolutionStrategy.set(com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO)
     defaultToAppBundles.set(true)
-    if (playServiceAccountFile.exists()) {
-        serviceAccountCredentials.set(playServiceAccountFile)
-    }
+    serviceAccountCredentials.set(playServiceAccountFile)
 }
 
 dependencies {
