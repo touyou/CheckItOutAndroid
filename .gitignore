@@ -12,3 +12,8 @@
 /captures
 .externalNativeBuild
 .cxx
+# リリース署名と Play Developer API の鍵。CI が実行時にだけ書き出す
+keystore.properties
+*.jks
+*.keystore
+play-service-account.json
