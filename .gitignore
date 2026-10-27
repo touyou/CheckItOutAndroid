@@ -17,3 +17,6 @@ keystore.properties
 *.jks
 *.keystore
 play-service-account.json
+
+# Play ストア用の撮影の出力(scripts/capture-store-screenshots.sh)
+store-shots/
