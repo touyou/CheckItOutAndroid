@@ -3,7 +3,10 @@ package dev.touyou.checkitoutandroid
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Bundle
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -99,12 +102,29 @@ class MainActivity : AppCompatActivity() {
             binding.recButton.alpha = 0.3f
             binding.editButton.alpha = 1.0f
         }
+        binding.licensesButton.setOnClickListener { showLicenses() }
         binding.editButton.setOnClickListener {
             viewModel.changeMode(PlayMode.EDIT)
             binding.playButton.alpha = 1.0f
             binding.recButton.alpha = 1.0f
             binding.editButton.alpha = 0.3f
         }
+    }
+
+    // 同梱ライブラリとフォントのライセンス文。依存を足したら res/raw/licenses.txt も更新する
+    private fun showLicenses() {
+        val text = resources.openRawResource(R.raw.licenses).bufferedReader().use { it.readText() }
+        val padding = (16 * resources.displayMetrics.density).toInt()
+        val body = TextView(this).apply {
+            this.text = text
+            textSize = 12f
+            setPadding(padding, padding, padding, padding)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.licenses)
+            .setView(ScrollView(this).apply { addView(body) })
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun initSounds() {
