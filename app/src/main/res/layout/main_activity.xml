@@ -67,6 +67,22 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/logoImageView"
                 app:srcCompat="@drawable/professional" />
+
+            <TextView
+                android:id="@+id/licensesButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:fontFamily="@font/logotypejp_mp_b_1"
+                android:text="@string/licenses"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:alpha="0.7"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <FrameLayout
