@@ -19,7 +19,7 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Install Android SDK platform 37
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" "build-tools;36.0.0" > /dev/null
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
       - name: Build
         run: ./gradlew assembleDebug assembleRelease lintDebug
       # Play は targetSdk 35 以上のアプリに 16 KB ページサイズ対応を求める。ネイティブライブラリの LOAD セグメントが 16 KB 境界に揃っているかを見る
