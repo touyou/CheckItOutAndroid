@@ -1,7 +1,6 @@
 package dev.touyou.checkitoutandroid
 
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.os.Bundle
 import android.widget.ScrollView
 import android.widget.TextView
@@ -12,8 +11,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
 import dev.touyou.checkitoutandroid.databinding.MainActivityBinding
 import dev.touyou.checkitoutandroid.entity.PlayMode
 import dev.touyou.checkitoutandroid.entity.SoundData
@@ -22,6 +28,8 @@ import dev.touyou.checkitoutandroid.ui.main.PadFragment
 import dev.touyou.checkitoutandroid.ui.main.PadViewModel
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import kotlinx.coroutines.launch
+import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -33,6 +41,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var viewModel: PadViewModel
     private lateinit var binding: MainActivityBinding
+    private var foldingFeature: FoldingFeature? = null
+    private var appliedArrangement: Arrangement? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         initButton()
+        observeWindowLayout()
     }
 
     override fun onRequestPermissionsResult(
@@ -89,25 +100,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initButton() {
-        binding.playButton.alpha = 0.3f
-        binding.playButton.setOnClickListener {
-            viewModel.changeMode(PlayMode.PLAY)
-            binding.playButton.alpha = 0.3f
-            binding.recButton.alpha = 1.0f
-            binding.editButton.alpha = 1.0f
-        }
-        binding.recButton.setOnClickListener {
-            viewModel.changeMode(PlayMode.REC)
-            binding.playButton.alpha = 1.0f
-            binding.recButton.alpha = 0.3f
-            binding.editButton.alpha = 1.0f
-        }
+        binding.playButton.setOnClickListener { viewModel.changeMode(PlayMode.PLAY) }
+        binding.recButton.setOnClickListener { viewModel.changeMode(PlayMode.REC) }
+        binding.editButton.setOnClickListener { viewModel.changeMode(PlayMode.EDIT) }
         binding.licensesButton.setOnClickListener { showLicenses() }
-        binding.editButton.setOnClickListener {
-            viewModel.changeMode(PlayMode.EDIT)
-            binding.playButton.alpha = 1.0f
-            binding.recButton.alpha = 1.0f
-            binding.editButton.alpha = 0.3f
+        // 選択中のモードのボタンだけ薄くする。表示はモードから決め、作り直しても揃うようにする
+        viewModel.currentMode.observe(this) { mode ->
+            binding.playButton.alpha = if (mode == PlayMode.PLAY) 0.3f else 1.0f
+            binding.recButton.alpha = if (mode == PlayMode.REC) 0.3f else 1.0f
+            binding.editButton.alpha = if (mode == PlayMode.EDIT) 0.3f else 1.0f
         }
     }
 
@@ -141,32 +142,103 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // targetSdk 35 以降は edge-to-edge が強制されるため、背景画像だけ全面に敷いて操作部はシステムバーとカットアウトを避ける
+    // edge-to-edge なので、背景画像だけ全面に敷き、パッドと操作列はシステムバーとカットアウトを避ける
     private fun applySystemBarInsets() {
-        val pad = binding.padContainer
-        val column = binding.controlColumn
-        val padBase = Rect(pad.paddingLeft, pad.paddingTop, pad.paddingRight, pad.paddingBottom)
-        val columnBase =
-            Rect(column.paddingLeft, column.paddingTop, column.paddingRight, column.paddingBottom)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.content) { view, windowInsets ->
             val insets = windowInsets.getInsets(
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
-            pad.setPadding(
-                padBase.left + insets.left,
-                padBase.top + insets.top,
-                padBase.right,
-                padBase.bottom + insets.bottom
-            )
-            column.setPadding(
-                columnBase.left,
-                columnBase.top + insets.top,
-                columnBase.right + insets.right,
-                columnBase.bottom + insets.bottom
-            )
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
             windowInsets
         }
     }
+
+    private fun observeWindowLayout() {
+        binding.content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> applyArrangement() }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                WindowInfoTracker.getOrCreate(this@MainActivity)
+                    .windowLayoutInfo(this@MainActivity)
+                    .collect { info ->
+                        foldingFeature = info.displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()
+                        applyArrangement()
+                    }
+            }
+        }
+    }
+
+    /**
+     * iOS 版と同じく、ウィンドウの形で並べ方を決める。横長は左にパッド・右に操作列、縦長は上にパッド・
+     * 下に操作列。半開きの折りたたみでは折り目に沿って、16 個のパッドを片側にまとめる。
+     * 向きやサイズの変化では Activity を作り直さない(録音中の音を失わないため)ので、ここで並べ直す。
+     */
+    private fun applyArrangement() {
+        val content = binding.content
+        val width = content.width - content.paddingLeft - content.paddingRight
+        val height = content.height - content.paddingTop - content.paddingBottom
+        if (width <= 0 || height <= 0) return
+        val arrangement = arrangementFor(width, height, content)
+        if (arrangement == appliedArrangement) return
+        appliedArrangement = arrangement
+
+        val pad = R.id.padContainer
+        val column = R.id.controlColumn
+        val parent = ConstraintSet.PARENT_ID
+        ConstraintSet().apply {
+            clone(content)
+            clear(pad)
+            clear(column)
+            constrainWidth(pad, arrangement.padWidth)
+            constrainHeight(pad, arrangement.padHeight)
+            constrainWidth(column, ConstraintSet.MATCH_CONSTRAINT)
+            constrainHeight(column, ConstraintSet.MATCH_CONSTRAINT)
+            if (arrangement.sideBySide) {
+                connect(pad, ConstraintSet.START, parent, ConstraintSet.START)
+                connect(pad, ConstraintSet.TOP, parent, ConstraintSet.TOP)
+                connect(pad, ConstraintSet.BOTTOM, parent, ConstraintSet.BOTTOM)
+                connect(column, ConstraintSet.START, pad, ConstraintSet.END, arrangement.gap)
+                connect(column, ConstraintSet.END, parent, ConstraintSet.END)
+                connect(column, ConstraintSet.TOP, parent, ConstraintSet.TOP)
+                connect(column, ConstraintSet.BOTTOM, parent, ConstraintSet.BOTTOM)
+            } else {
+                connect(pad, ConstraintSet.TOP, parent, ConstraintSet.TOP)
+                connect(pad, ConstraintSet.START, parent, ConstraintSet.START)
+                connect(pad, ConstraintSet.END, parent, ConstraintSet.END)
+                connect(column, ConstraintSet.TOP, pad, ConstraintSet.BOTTOM, arrangement.gap)
+                connect(column, ConstraintSet.BOTTOM, parent, ConstraintSet.BOTTOM)
+                connect(column, ConstraintSet.START, parent, ConstraintSet.START)
+                connect(column, ConstraintSet.END, parent, ConstraintSet.END)
+            }
+            applyTo(content)
+        }
+    }
+
+    private fun arrangementFor(width: Int, height: Int, content: ConstraintLayout): Arrangement {
+        val fold = foldingFeature?.takeIf { it.isSeparating }
+        val sideBySide = fold?.let { it.orientation == FoldingFeature.Orientation.VERTICAL } ?: (width >= height)
+        val total = if (sideBySide) width else height
+        val minPane = (160 * resources.displayMetrics.density).toInt()
+        // 折り目は window 座標で来るので、パッドと操作列を置く領域の位置を引いてから使う
+        val split = fold?.let {
+            val origin = IntArray(2).also(content::getLocationInWindow)
+            val start = if (sideBySide) {
+                it.bounds.left - origin[0] - content.paddingLeft
+            } else {
+                it.bounds.top - origin[1] - content.paddingTop
+            }
+            val gap = if (sideBySide) it.bounds.width() else it.bounds.height()
+            (start to gap).takeIf { start >= minPane && start + gap <= total - minPane }
+        }
+        return when {
+            split != null && sideBySide -> Arrangement(true, split.first, height, split.second)
+            split != null -> Arrangement(false, min(width, split.first), split.first, split.second)
+            sideBySide -> Arrangement(true, width / 2, height, 0)
+            // 縦長: パッドは正方形にして、操作列(サウンド一覧と録音・再生・編集)の高さを残す
+            else -> min(width, height * 3 / 5).let { side -> Arrangement(false, side, side, 0) }
+        }
+    }
+
+    private data class Arrangement(val sideBySide: Boolean, val padWidth: Int, val padHeight: Int, val gap: Int)
 
     private fun ensurePermissionAllowed() {
         if (ContextCompat.checkSelfPermission(
