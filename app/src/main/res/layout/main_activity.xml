@@ -59,10 +59,11 @@
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:scaleType="centerInside"
+                    app:layout_constraintBottom_toTopOf="@id/subTitleImageView"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHeight_percent="0.5"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/licensesButton"
+                    app:layout_constraintVertical_chainStyle="spread"
                     app:srcCompat="@drawable/logo" />
 
                 <ImageView

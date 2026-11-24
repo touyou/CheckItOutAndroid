@@ -193,11 +193,12 @@ class MainActivity : AppCompatActivity() {
             constrainWidth(column, ConstraintSet.MATCH_CONSTRAINT)
             constrainHeight(column, ConstraintSet.MATCH_CONSTRAINT)
             if (arrangement.sideBySide) {
-                connect(pad, ConstraintSet.START, parent, ConstraintSet.START)
+                // 折り目の位置は左からの距離なので、RTL でも左右は物理的な向きでつなぐ
+                connect(pad, ConstraintSet.LEFT, parent, ConstraintSet.LEFT)
                 connect(pad, ConstraintSet.TOP, parent, ConstraintSet.TOP)
                 connect(pad, ConstraintSet.BOTTOM, parent, ConstraintSet.BOTTOM)
-                connect(column, ConstraintSet.START, pad, ConstraintSet.END, arrangement.gap)
-                connect(column, ConstraintSet.END, parent, ConstraintSet.END)
+                connect(column, ConstraintSet.LEFT, pad, ConstraintSet.RIGHT, arrangement.gap)
+                connect(column, ConstraintSet.RIGHT, parent, ConstraintSet.RIGHT)
                 connect(column, ConstraintSet.TOP, parent, ConstraintSet.TOP)
                 connect(column, ConstraintSet.BOTTOM, parent, ConstraintSet.BOTTOM)
             } else {

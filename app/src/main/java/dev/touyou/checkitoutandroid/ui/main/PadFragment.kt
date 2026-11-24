@@ -41,6 +41,8 @@ class PadFragment : Fragment() {
         null, null, null, null
     )
 
+    private val assignedSounds: MutableList<AssignedSound?> = MutableList(16) { null }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -75,6 +77,7 @@ class PadFragment : Fragment() {
         for (i in mediaPlayers.indices) {
             mediaPlayers[i]?.release()
             mediaPlayers[i] = null
+            assignedSounds[i] = null
         }
     }
 
@@ -83,7 +86,9 @@ class PadFragment : Fragment() {
             imageView.setImageResource(padImage(idx))
         }
         for ((index, sound) in list.withIndex()) {
-            // 割り当てが変わるたびに作り直すので、前の MediaPlayer はここで解放する
+            // 割り当てが変わったパッドだけ作り直す(ほかのパッドで鳴っている音を止めないため)
+            if (index < assignedSounds.size && assignedSounds[index] == sound && mediaPlayers[index] != null) continue
+            if (index < assignedSounds.size) assignedSounds[index] = sound
             mediaPlayers[index]?.release()
             if (sound != null) {
                 if (sound.isRaw) mediaPlayers[index] =
