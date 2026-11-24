@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeWindowLayout() {
-        binding.content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> applyArrangement() }
+        binding.content.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ -> view.post { applyArrangement() } }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 WindowInfoTracker.getOrCreate(this@MainActivity)
