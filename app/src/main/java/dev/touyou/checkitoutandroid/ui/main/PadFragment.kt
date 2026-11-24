@@ -72,8 +72,9 @@ class PadFragment : Fragment() {
         super.onDestroyView()
         _binding = null
 
-        for (mediaPlayer in mediaPlayers) {
-            mediaPlayer?.release()
+        for (i in mediaPlayers.indices) {
+            mediaPlayers[i]?.release()
+            mediaPlayers[i] = null
         }
     }
 
@@ -82,6 +83,8 @@ class PadFragment : Fragment() {
             imageView.setImageResource(padImage(idx))
         }
         for ((index, sound) in list.withIndex()) {
+            // 割り当てが変わるたびに作り直すので、前の MediaPlayer はここで解放する
+            mediaPlayers[index]?.release()
             if (sound != null) {
                 if (sound.isRaw) mediaPlayers[index] =
                     sound.rawId?.let { MediaPlayer.create(activity, it) }
