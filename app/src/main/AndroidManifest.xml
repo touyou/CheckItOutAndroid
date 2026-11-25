@@ -14,7 +14,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:exported="true">
-            <!-- 向き・サイズの変化では作り直さず、MainActivity.applyArrangement で並べ直す(録音中の音を失わないため) -->
+            <!-- 向き・サイズの変化では作り直さず、MainActivity.applyArrangement で並べ直す(開閉のたびに画面を組み直さないため)。録音は作り直しても RecorderViewModel に残る -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
