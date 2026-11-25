@@ -116,7 +116,7 @@
                 <ImageView
                     android:id="@+id/recButton"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/rec_button" />
@@ -124,7 +124,7 @@
                 <ImageView
                     android:id="@+id/playButton"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/play_button" />
@@ -132,7 +132,7 @@
                 <ImageView
                     android:id="@+id/editButton"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="64dp"
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
                     app:srcCompat="@drawable/edit_button" />
