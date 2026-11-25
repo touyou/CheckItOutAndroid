@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * iOS 版と同じく、ウィンドウの形で並べ方を決める。横長は左にパッド・右に操作列、縦長は上にパッド・
      * 下に操作列。半開きの折りたたみでは折り目に沿って、16 個のパッドを片側にまとめる。
-     * 向きやサイズの変化では Activity を作り直さない(録音中の音を失わないため)ので、ここで並べ直す。
+     * 向きやサイズの変化では Activity を作り直さないので、ここで並べ直す。
      */
     private fun applyArrangement() {
         val content = binding.content
