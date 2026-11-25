@@ -115,9 +115,12 @@ class ControlFragment : Fragment() {
     private fun setupRecMode() {
         binding.recRecButton.setOnClickListener {
             if (recorder.file != null) return@setOnClickListener
+            if (!recorder.startRecording()) {
+                Toast.makeText(context, "録音を始められませんでした。", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             createNewVisualizerManager(1)
             visualizerManager?.start(binding.visualizer, arrayOf(ColumnarType1Renderer()))
-            if (!recorder.startRecording()) stopVisualizer()
         }
         binding.stopRecButton.setOnClickListener {
             stopVisualizer()

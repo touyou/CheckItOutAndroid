@@ -66,14 +66,15 @@ class RecorderViewModel(application: Application) : AndroidViewModel(application
             newRecorder.setOutputFile(newFile)
             newRecorder.prepare()
             newRecorder.start()
-            audioRecord.startRecording()
             isRecording = true
+            audioRecord.startRecording()
             true
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
+            // マイクの権限が無いときは RuntimeException になる。途中まで録れたファイルも使えないので捨てる
             e.printStackTrace()
-            false
-        } catch (e: IOException) {
-            e.printStackTrace()
+            stopRecording()
+            file?.delete()
+            file = null
             false
         }
     }
@@ -101,12 +102,18 @@ class RecorderViewModel(application: Application) : AndroidViewModel(application
     fun play(): MediaPlayer? {
         if (isRecording || player?.isPlaying == true) return null
         val target = file ?: return null
-        player?.release()
-        return MediaPlayer().apply {
-            setDataSource(target.absolutePath)
-            prepare()
-            start()
-        }.also { player = it }
+        releasePlayer()
+        val newPlayer = MediaPlayer()
+        return try {
+            newPlayer.setDataSource(target.absolutePath)
+            newPlayer.prepare()
+            newPlayer.start()
+            newPlayer.also { player = it }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            newPlayer.release()
+            null
+        }
     }
 
     /** 保存に回すファイルを受け取る。以後このファイルは消さない */
