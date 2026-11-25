@@ -10,14 +10,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <!-- targetSdk 36 では大画面で screenOrientation が無視される。横画面固定のレイアウトしか無いので API 36 の間はオプトアウトする -->
-        <property
-            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
-            android:value="true" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:screenOrientation="landscape">
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="true">
+            <!-- 向き・サイズの変化では作り直さず、MainActivity.applyArrangement で並べ直す(録音中の音を失わないため) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
